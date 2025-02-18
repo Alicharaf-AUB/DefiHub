@@ -271,7 +271,7 @@ const HomeP = () => {
                 <button className="px-8 py-4 bg-purple-600 rounded-lg group hover:bg-purple-500 transition-all duration-500">
                   <span className="relative inline-flex items-center">
                     <span className="animate-pulse-slow absolute inset-0 rounded-lg bg-purple-400/30 group-hover:bg-purple-400/50 transition-all duration-500"></span>
-                    <span className="relative">Start Trading</span>
+                    <span className="relative">Start Building</span>
                   </span>
                 </button>
                 <button className="px-8 py-4 border border-purple-500/30 rounded-lg hover:bg-purple-600/10 transition-all duration-500 group">
