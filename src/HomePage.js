@@ -293,6 +293,150 @@ const HomeP = () => {
           </div>
         </section>
 
+        {/* Stats Section */}
+        <section className="py-20 bg-black/80">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { label: 'Total Value Locked', value: '$5.2B+' },
+                { label: '24h Trading Volume', value: '$850M+' },
+                { label: 'Active Users', value: '250K+' }
+              ].map((stat, index) => (
+                <div
+                  key={index}
+                  className="p-8 rounded-2xl bg-purple-900/20 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300"
+                >
+                  <h3 className="text-purple-300 mb-2">{stat.label}</h3>
+                  <p className="text-4xl font-bold">{stat.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-20 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">
+              Why Choose DeFi Hub?
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              {[
+                {
+                  title: 'Lightning Fast',
+                  description: 'Sub-second trade execution with minimal gas fees',
+                  icon: '⚡️',
+                  gradient: 'from-purple-500 to-blue-500'
+                },
+                {
+                  title: 'Bank-Grade Security',
+                  description: 'Protected by advanced cryptography and audited contracts',
+                  icon: '🛡️',
+                  gradient: 'from-purple-500 to-pink-500'
+                },
+                {
+                  title: 'Yield Optimization',
+                  description: 'Automated strategies to maximize your crypto returns',
+                  icon: '📈',
+                  gradient: 'from-purple-500 to-indigo-500'
+                }
+              ].map((feature, index) => (
+                <div
+                  key={index}
+                  className="group relative p-8 rounded-2xl bg-purple-900/10 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-500 hover:transform hover:scale-105"
+                >
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`}
+                  />
+                  <div className="text-4xl mb-6">{feature.icon}</div>
+                  <h3 className="text-2xl font-bold mb-4 text-white">{feature.title}</h3>
+                  <p className="text-purple-200">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section className="py-20 relative overflow-hidden bg-black/50">
+          <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">
+              Trading Tiers
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  name: 'Basic',
+                  price: '0%',
+                  feature: 'Trading Fee',
+                  benefits: ['Basic Trading', 'Standard Support', 'Market Orders'],
+                  gradient: 'from-purple-500/20 to-blue-500/20'
+                },
+                {
+                  name: 'Pro',
+                  price: '0.1%',
+                  feature: 'Trading Fee',
+                  benefits: ['Advanced Trading', 'Priority Support', 'Limit Orders', 'API Access'],
+                  gradient: 'from-purple-500/20 to-pink-500/20',
+                  popular: true
+                },
+                {
+                  name: 'Enterprise',
+                  price: 'Custom',
+                  feature: 'Trading Fee',
+                  benefits: [
+                    'Institutional Trading',
+                    '24/7 Support',
+                    'Custom Solutions',
+                    'Dedicated Server'
+                  ],
+                  gradient: 'from-purple-500/20 to-indigo-500/20'
+                }
+              ].map((tier, index) => (
+                <div
+                  key={index}
+                  className={`relative p-8 rounded-2xl transition-all duration-500 hover:transform hover:scale-105 ${
+                    tier.popular
+                      ? 'bg-purple-900/30 border-2 border-purple-500'
+                      : 'bg-purple-900/10 border border-purple-500/20'
+                  }`}
+                >
+                  {tier.popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-purple-500 rounded-full text-sm font-medium">
+                      Most Popular
+                    </div>
+                  )}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${tier.gradient} opacity-20 rounded-2xl`}
+                  />
+                  <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
+                  <div className="text-4xl font-bold mb-4">{tier.price}</div>
+                  <div className="text-purple-300 mb-6">{tier.feature}</div>
+                  <ul className="space-y-4">
+                    {tier.benefits.map((benefit, i) => (
+                      <li key={i} className="flex items-center text-purple-200">
+                        <span className="mr-2">✦</span>
+                        {benefit}
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    className={`mt-8 w-full py-3 rounded-lg transition-all duration-300 ${
+                      tier.popular
+                        ? 'bg-purple-500 hover:bg-purple-400'
+                        : 'border border-purple-500/30 hover:bg-purple-500/20'
+                    }`}
+                  >
+                    Get Started
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        
+
         {/* Sound Toggle */}
         <button
           onClick={() => setIsSoundOn(!isSoundOn)}
