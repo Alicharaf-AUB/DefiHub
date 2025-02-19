@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Volume2, VolumeX, Menu } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 /* -----------------------
    Cinematic Intro
@@ -104,6 +105,7 @@ const CinematicIntro = ({ onComplete }) => {
 const HomeP = () => {
   const [isIntroComplete, setIsIntroComplete] = useState(false);
   const [isSoundOn, setIsSoundOn] = useState(true);
+  const navigate = useNavigate();
 
   const [audioContext, setAudioContext] = useState(null);
   const [audioBuffer, setAudioBuffer] = useState(null);
@@ -268,7 +270,9 @@ const HomeP = () => {
               </p>
 
               <div className="flex flex-wrap justify-center gap-6 transform translate-y-8 opacity-0 animate-title-4">
-                <button className="px-8 py-4 bg-purple-600 rounded-lg group hover:bg-purple-500 transition-all duration-500">
+                <button
+                onClick={() => navigate("/signup")}
+                className="px-8 py-4 bg-purple-600 rounded-lg group hover:bg-purple-500 transition-all duration-500">
                   <span className="relative inline-flex items-center">
                     <span className="animate-pulse-slow absolute inset-0 rounded-lg bg-purple-400/30 group-hover:bg-purple-400/50 transition-all duration-500"></span>
                     <span className="relative">Start Building</span>
