@@ -194,13 +194,13 @@ const HomeP = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="hidden md:block px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all duration-300 hover:scale-105">
-                Connect Wallet
-              </button>
-              <button className="md:hidden p-2">
-                <Menu size={24} />
-              </button>
-            </div>
+  <button className="px-4 py-2 sm:px-6 sm:py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all duration-300 hover:scale-105 text-xs sm:text-base block md:inline">
+    Connect Wallet
+  </button>
+  <button className="md:hidden p-2">
+    <Menu size={24} />
+  </button>
+</div>
           </div>
         </nav>
 
@@ -513,12 +513,11 @@ const HomeP = () => {
         
 
         {/* Sound Toggle */}
-        <button
-          onClick={() => setIsSoundOn(!isSoundOn)}
-          className="fixed top-6 right-6 z-50 p-2 text-purple-200 hover:text-white transition-colors duration-300"
-        >
-          {isSoundOn ? <Volume2 size={24} /> : <VolumeX size={24} />}
-        </button>
+        <button 
+        onClick={() => setIsSoundOn(!isSoundOn)} 
+        className="fixed right-4 z-50 p-3 bg-black/50 rounded-full hover:bg-black/70 transition-all duration-300 md:top-4 top-16">
+        {isSoundOn ? <Volume2 size={24} className="text-purple-200" /> : <VolumeX size={24} className="text-purple-200" />}
+      </button>
       </div>
 
       {/* Inline Styles & Keyframes */}
