@@ -87,9 +87,8 @@ const CinematicIntro = ({ onComplete }) => {
         </div>
         {/* Brand Text */}
         <div
-          className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-8 text-center ${
-            phase >= 5 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          } transition-all duration-1000`}
+          className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-8 text-center ${phase >= 5 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            } transition-all duration-1000`}
         >
           <h1 className="text-3xl font-bold text-white mb-2">DeFi Hub</h1>
           <p className="text-purple-300">Enter the Future of Finance</p>
@@ -177,30 +176,29 @@ const HomeP = () => {
 
       {/* Main Content (appears after intro completes) */}
       <div
-        className={`transition-opacity duration-1000 ${
-          isIntroComplete ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`transition-opacity duration-1000 ${isIntroComplete ? 'opacity-100' : 'opacity-0'
+          }`}
       >
         {/* Navigation */}
         <nav className="fixed top-0 left-0 right-0 z-40 bg-black/50 backdrop-blur-md border-b border-purple-500/10">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-12">
+            <div className="flex items-center space-x-10">
               <div className="text-2xl font-bold">DeFi Hub</div>
-              <div className="hidden md:flex space-x-8">
+              <div className="hidden md:flex space-x-6">
                 <button className="text-purple-200 hover:text-white transition-colors duration-300">Trade</button>
                 <button className="text-purple-200 hover:text-white transition-colors duration-300">Stake</button>
                 <button className="text-purple-200 hover:text-white transition-colors duration-300">Farm</button>
                 <button className="text-purple-200 hover:text-white transition-colors duration-300">Analytics</button>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-  <button className="px-4 py-2 sm:px-6 sm:py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all duration-300 hover:scale-105 text-xs sm:text-base block md:inline">
-    Connect Wallet
-  </button>
-  <button className="md:hidden p-2">
-    <Menu size={24} />
-  </button>
-</div>
+            <div className="flex items-center space-x-2 md:space-x-4 lg:space-x-6 lg:ml-auto">
+              <button className="px-4 py-2 sm:px-6 sm:py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all duration-300 hover:scale-105 text-xs sm:text-base block md:inline md:mr-6 lg:mr-8">
+                Connect Wallet
+              </button>
+              <button className="md:hidden p-2">
+                <Menu size={24} />
+              </button>
+            </div>
           </div>
         </nav>
 
@@ -271,8 +269,8 @@ const HomeP = () => {
 
               <div className="flex flex-wrap justify-center gap-6 transform translate-y-8 opacity-0 animate-title-4">
                 <button
-                onClick={() => navigate("/signup")}
-                className="px-8 py-4 bg-purple-600 rounded-lg group hover:bg-purple-500 transition-all duration-500">
+                  onClick={() => navigate("/signup")}
+                  className="px-8 py-4 bg-purple-600 rounded-lg group hover:bg-purple-500 transition-all duration-500">
                   <span className="relative inline-flex items-center">
                     <span className="animate-pulse-slow absolute inset-0 rounded-lg bg-purple-400/30 group-hover:bg-purple-400/50 transition-all duration-500"></span>
                     <span className="relative">Start Building</span>
@@ -367,7 +365,7 @@ const HomeP = () => {
             <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center">
               Trading Tiers
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 {
                   name: 'Basic',
@@ -399,11 +397,10 @@ const HomeP = () => {
               ].map((tier, index) => (
                 <div
                   key={index}
-                  className={`relative p-8 rounded-2xl transition-all duration-500 hover:transform hover:scale-105 ${
-                    tier.popular
+                  className={`relative p-8 rounded-2xl transition-all duration-500 hover:transform hover:scale-105 ${tier.popular
                       ? 'bg-purple-900/30 border-2 border-purple-500'
                       : 'bg-purple-900/10 border border-purple-500/20'
-                  }`}
+                    }`}
                 >
                   {tier.popular && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-purple-500 rounded-full text-sm font-medium">
@@ -425,11 +422,10 @@ const HomeP = () => {
                     ))}
                   </ul>
                   <button
-                    className={`mt-8 w-full py-3 rounded-lg transition-all duration-300 ${
-                      tier.popular
+                    className={`mt-8 w-full py-3 rounded-lg transition-all duration-300 ${tier.popular
                         ? 'bg-purple-500 hover:bg-purple-400'
                         : 'border border-purple-500/30 hover:bg-purple-500/20'
-                    }`}
+                      }`}
                   >
                     Get Started
                   </button>
@@ -438,6 +434,7 @@ const HomeP = () => {
             </div>
           </div>
         </section>
+
 
         {/* Footer */}
         <footer className="bg-black/80 border-t border-purple-500/10">
@@ -510,14 +507,14 @@ const HomeP = () => {
         </footer>
 
 
-        
+
 
         {/* Sound Toggle */}
-        <button 
-        onClick={() => setIsSoundOn(!isSoundOn)} 
-        className="fixed right-4 z-50 p-3 bg-black/50 rounded-full hover:bg-black/70 transition-all duration-300 md:top-4 top-16">
-        {isSoundOn ? <Volume2 size={24} className="text-purple-200" /> : <VolumeX size={24} className="text-purple-200" />}
-      </button>
+        <button
+          onClick={() => setIsSoundOn(!isSoundOn)}
+          className="fixed right-4 z-50 p-3 bg-black/50 rounded-full hover:bg-black/70 transition-all duration-300 md:top-4 top-16 right-16">
+          {isSoundOn ? <Volume2 size={24} className="text-purple-200" /> : <VolumeX size={24} className="text-purple-200" />}
+        </button>
       </div>
 
       {/* Inline Styles & Keyframes */}
