@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Menu } from 'lucide-react';
+import {  Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 /* -----------------------
@@ -103,70 +103,15 @@ const CinematicIntro = ({ onComplete }) => {
 -------------------------*/
 const HomeP = () => {
   const [isIntroComplete, setIsIntroComplete] = useState(false);
-  const [isSoundOn, setIsSoundOn] = useState(true);
+  //const [isSoundOn, setIsSoundOn] = useState(true);
   const navigate = useNavigate();
 
-  const [audioContext, setAudioContext] = useState(null);
-  const [audioBuffer, setAudioBuffer] = useState(null);
-  const [audioSource, setAudioSource] = useState(null);
+  //const [audioContext, setAudioContext] = useState(null);
+  //const [audioBuffer, setAudioBuffer] = useState(null);
+  //const [audioSource, setAudioSource] = useState(null);
 
   // Create AudioContext and load the sound once.
-  useEffect(() => {
-    const context = new (window.AudioContext || window.webkitAudioContext)();
-    setAudioContext(context);
-
-    // Load ambient sound
-    fetch('/api/ambient-sound.mp3')
-      .then(response => response.arrayBuffer())
-      .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
-      .then(buffer => setAudioBuffer(buffer))
-      .catch(error => console.error('Error loading audio:', error));
-
-    // Cleanup on unmount
-    return () => {
-      if (audioSource && audioSource.source) {
-        audioSource.source.stop();
-      }
-      context.close();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!audioContext || !audioBuffer) return;
-
-    if (isSoundOn) {
-      // Create a new source
-      const source = audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.loop = true;
-
-      // Create a gain node for fade in/out
-      const gainNode = audioContext.createGain();
-      gainNode.gain.value = 0;
-
-      // Connect them up
-      source.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      // Fade in over 2 seconds to gain = 0.3
-      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 2);
-
-      // Start playback
-      source.start();
-
-      // Store both source & gain node so we can fade out later
-      setAudioSource({ source, gainNode });
-    } else if (audioSource) {
-      // Fade out over 2 seconds
-      audioSource.gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
-
-      // Stop the source after fade out completes
-      setTimeout(() => {
-        audioSource.source.stop();
-      }, 2000);
-    }
-  }, [isSoundOn, audioContext, audioBuffer, audioSource]);
-
+ 
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Intro Sequence */}
@@ -180,7 +125,7 @@ const HomeP = () => {
           }`}
       >
         {/* Navigation */}
-        <nav className="fixed top-0 left-0 right-0 z-40 bg-black/50 backdrop-blur-md border-b border-purple-500/10">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-md border-b border-purple-500/10">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-10">
               <div className="text-2xl font-bold">DeFi Hub</div>
@@ -191,11 +136,11 @@ const HomeP = () => {
                 <button className="text-purple-200 hover:text-white transition-colors duration-300">Analytics</button>
               </div>
             </div>
-            <div className="flex items-center space-x-2 md:space-x-4 lg:space-x-6 lg:ml-auto">
-              <button className="px-4 py-2 sm:px-6 sm:py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all duration-300 hover:scale-105 text-xs sm:text-base block md:inline md:mr-6 lg:mr-8">
+            <div className="flex items-center space-x-4 ml-auto">
+            <button className="px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all duration-300 hover:scale-105 text-sm sm:text-base">
                 Connect Wallet
               </button>
-              <button className="md:hidden p-2">
+              <button className="md:hidden p-2 ml-4">
                 <Menu size={24} />
               </button>
             </div>
@@ -510,11 +455,7 @@ const HomeP = () => {
 
 
         {/* Sound Toggle */}
-        <button
-          onClick={() => setIsSoundOn(!isSoundOn)}
-          className="fixed right-4 z-50 p-3 bg-black/50 rounded-full hover:bg-black/70 transition-all duration-300 md:top-4 top-16 right-16">
-          {isSoundOn ? <Volume2 size={24} className="text-purple-200" /> : <VolumeX size={24} className="text-purple-200" />}
-        </button>
+        
       </div>
 
       {/* Inline Styles & Keyframes */}
