@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {  Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 /* -----------------------
    Cinematic Intro
@@ -125,27 +127,7 @@ const HomeP = () => {
           }`}
       >
         {/* Navigation */}
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-md border-b border-purple-500/10">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-10">
-              <div className="text-2xl font-bold">DeFi Hub</div>
-              <div className="hidden md:flex space-x-6">
-                <button className="text-purple-200 hover:text-white transition-colors duration-300">Trade</button>
-                <button className="text-purple-200 hover:text-white transition-colors duration-300">Stake</button>
-                <button className="text-purple-200 hover:text-white transition-colors duration-300">Farm</button>
-                <button className="text-purple-200 hover:text-white transition-colors duration-300">Analytics</button>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4 ml-auto">
-            <button className="px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all duration-300 hover:scale-105 text-sm sm:text-base">
-                Connect Wallet
-              </button>
-              <button className="md:hidden p-2 ml-4">
-                <Menu size={24} />
-              </button>
-            </div>
-          </div>
-        </nav>
+        <Header />
 
         {/* Hero Section */}
         <section className="relative min-h-screen overflow-hidden">
@@ -382,74 +364,7 @@ const HomeP = () => {
 
 
         {/* Footer */}
-        <footer className="bg-black/80 border-t border-purple-500/10">
-          <div className="max-w-7xl mx-auto px-6 py-20">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-              <div className="space-y-6">
-                <h3 className="text-2xl font-bold">DeFi Hub</h3>
-                <p className="text-purple-300">
-                  Building the future of decentralized finance, one block at a time.
-                </p>
-                <div className="flex space-x-4">
-                  {['Twitter', 'Discord', 'Telegram', 'Github'].map((social) => (
-                    <button
-                      key={social}
-                      className="w-10 h-10 rounded-lg bg-purple-900/30 hover:bg-purple-900/50 flex items-center justify-center transition-all duration-300"
-                    >
-                      <span className="text-purple-300 hover:text-white">
-                        {social[0]}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {[
-                {
-                  title: 'Products',
-                  links: ['Trade', 'Stake', 'Farm', 'Analytics']
-                },
-                {
-                  title: 'Company',
-                  links: ['About', 'Careers', 'Blog', 'Press']
-                },
-                {
-                  title: 'Resources',
-                  links: ['Documentation', 'Help Center', 'Terms', 'Privacy']
-                }
-              ].map((section) => (
-                <div key={section.title}>
-                  <h4 className="text-lg font-semibold mb-6">{section.title}</h4>
-                  <ul className="space-y-4">
-                    {section.links.map((link) => (
-                      <li key={link}>
-                        <button className="text-purple-300 hover:text-white transition-colors duration-300">
-                          {link}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-8 border-t border-purple-500/10 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-purple-400 mb-4 md:mb-0">
-                © 2025 DeFi Hub. All rights reserved.
-              </p>
-              <div className="flex items-center space-x-6">
-                {['Terms', 'Privacy', 'Cookies'].map((item) => (
-                  <button
-                    key={item}
-                    className="text-purple-400 hover:text-white transition-colors duration-300"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </footer>
+        <Footer />
 
 
 
