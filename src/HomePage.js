@@ -3,6 +3,7 @@ import {  Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import TestFlaskAPI from './components/TestFlaskApi';
 
 /* -----------------------
    Cinematic Intro
@@ -242,6 +243,16 @@ const HomeP = () => {
             </div>
           </div>
         </section>
+
+
+        <section className="py-20 bg-black/80">
+  <div className="max-w-7xl mx-auto px-6 text-center">
+    <h2 className="text-3xl font-bold mb-4 text-purple-300">
+      Flask API Test
+    </h2>
+    <TestFlaskAPI />
+  </div>
+</section>
 
         {/* Features Section */}
         <section className="py-20 relative overflow-hidden">
