@@ -59,6 +59,14 @@ export default function TokenCreationForm() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-black text-white overflow-hidden">
+
+      {/* Connect Wallet Button */}
+      <div className="absolute top-4 right-6 z-20">
+        <button className="px-5 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all">
+         Connect Wallet 
+        </button>
+      </div>
+
       {/* Background Crystals */}
       <div className="absolute inset-0 overflow-hidden">
         {Array.from({ length: 15 }).map((_, i) => (
