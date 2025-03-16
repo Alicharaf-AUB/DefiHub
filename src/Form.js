@@ -1,15 +1,18 @@
 "use client"
 
 import { useState } from "react"
+import { BrowserProvider } from "ethers"; 
+
 
 export default function TokenCreationForm() {
-  const [selectedNetwork, setSelectedNetwork] = useState("ethereum")
-  const [tokenName, setTokenName] = useState("")
-  const [tokenSymbol, setTokenSymbol] = useState("")
-  const [totalSupply, setTotalSupply] = useState("")
-  const [decimals, setDecimals] = useState("")
-  const [tokenType, setTokenType] = useState("")
-  const [error, setError] = useState("")
+  const [selectedNetwork, setSelectedNetwork] = useState("ethereum");
+  const [tokenName, setTokenName] = useState("");
+  const [tokenSymbol, setTokenSymbol] = useState("");
+  const [totalSupply, setTotalSupply] = useState("");
+  const [decimals, setDecimals] = useState("");
+  const [tokenType, setTokenType] = useState("");
+  const [error, setError] = useState("");
+  const [walletAddress, setWalletAddress] = useState(null);
 
   // Network-specific options
   const networkOptions = {
@@ -36,6 +39,33 @@ export default function TokenCreationForm() {
     setTokenType(networkOptions[network].tokenTypes[0])
     setDecimals(networkOptions[network].defaultDecimals)
   }
+  const connectWallet = async () => {
+    if (typeof window !== "undefined" && window.ethereum) {
+      try {
+        const provider = new BrowserProvider(window.ethereum); // Updated for ethers v6
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+  
+        const signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        setWalletAddress(address);
+  
+        window.ethereum.on("accountsChanged", (accounts) => {
+          setWalletAddress(accounts.length > 0 ? accounts[0] : null);
+        });
+  
+        window.ethereum.on("chainChanged", () => {
+          window.location.reload();
+        });
+  
+      } catch (err) {
+        setError("Failed to connect MetaMask. Please try again.");
+      }
+    } else {
+      setError("MetaMask is not installed. Please install MetaMask and try again.");
+    }
+  };
+  
+  
 
   const handleCreateToken = async (e) => {
     e.preventDefault()
@@ -62,9 +92,18 @@ export default function TokenCreationForm() {
 
       {/* Connect Wallet Button */}
       <div className="absolute top-4 right-6 z-20">
-        <button className="px-5 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all">
+        {walletAddress ? (
+          <span className="px-5 py-2 bg-green-600 rounded-lg">
+            {walletAddress.substring(0, 6)}...{walletAddress.slice(-4)}
+          </span>
+          ) : (
+            <button
+              onClick={connectWallet}
+              className="px-5 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-all"
+            >
          Connect Wallet 
         </button>
+          )}
       </div>
 
       {/* Background Crystals */}
@@ -327,4 +366,3 @@ export default function TokenCreationForm() {
     </div>
   )
 }
-
