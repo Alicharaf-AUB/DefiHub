@@ -67,7 +67,7 @@ export default function Home() {
   Dashboard
 </Button>
 
-              <Button size="sm" onClick={handleStartBuilding}>Start Building</Button>
+              <Button size="sm" onClick={handleStartBuilding}>Login</Button>
           </div>
         </div>
       </header>
