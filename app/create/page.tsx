@@ -121,22 +121,49 @@ export default function CreateTokenPage() {
     }
   }
 
-  const deployToken = () => {
+  const deployToken = async () => {
     toast({
       title: "Token deployment initiated",
-      description: "Your token is being deployed to the blockchain",
+      description: "Sending your token data to the backend...",
     })
-
-    // Simulate deployment delay
-    setTimeout(() => {
-      toast({
-        title: "Token deployed successfully",
-        description: "Your token has been created and deployed to the blockchain",
+  
+    const token = localStorage.getItem("token")
+  
+    try {
+      const response = await fetch("http://127.0.0.1:5000/create-coin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ Send the token to Flask
+        },
+        body: JSON.stringify(tokenData),
       })
-      // Redirect to dashboard
-      window.location.href = "/dashboard"
-    }, 3000)
+  
+      const result = await response.json()
+  
+      if (response.ok) {
+        toast({
+          title: "Token deployed successfully",
+          description: `Token "${result.saved.name}" created!`,
+        })
+        window.location.href = "/dashboard"
+      } else {
+        toast({
+          title: "Deployment failed",
+          description: result.error || "Unknown error",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Network error",
+        description: "Unable to reach the backend server",
+        variant: "destructive",
+      })
+    }
   }
+  
+  
 
   return (
     <div className="container py-10">

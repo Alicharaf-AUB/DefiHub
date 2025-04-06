@@ -1,3 +1,6 @@
+"use client"
+import { use, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Coins, Shield, Zap } from "lucide-react"
 import Link from "next/link"
@@ -8,8 +11,22 @@ import { FAQ } from "@/components/faq"
 import { Footer } from "@/components/footer"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { WalletConnectButton } from "@/components/wallet-connect-button"
+import { set } from "date-fns"
+import { Toaster } from "@/components/ui/toaster"
 
 export default function Home() {
+  const router = useRouter()
+  const handleStartBuilding = () => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      router.push("/dashboard")
+    } else {
+      router.push("/login")
+    }
+  }
+  
+
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -35,14 +52,22 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <WalletConnectButton />
-            <Link href="/dashboard">
-              <Button variant="outline" size="sm">
-                Dashboard
-              </Button>
-            </Link>
-            <Link href="/create">
-              <Button size="sm">Start Building</Button>
-            </Link>
+            <Button
+  variant="outline"
+  size="sm"
+  onClick={() => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      router.push("/dashboard")
+    } else {
+      router.push("/login")
+    }
+  }}
+>
+  Dashboard
+</Button>
+
+              <Button size="sm" onClick={handleStartBuilding}>Start Building</Button>
           </div>
         </div>
       </header>
@@ -67,14 +92,15 @@ export default function Home() {
                 No coding required. Deploy your token on multiple blockchains with just a few clicks.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link href="/create">
+                
                   <Button
                     size="lg"
                     className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600"
+                    onClick={handleStartBuilding}
                   >
                     Start Building
                   </Button>
-                </Link>
+                
                 <Link href="/documentation">
                   <Button size="lg" variant="outline">
                     Learn More
