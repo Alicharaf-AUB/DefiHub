@@ -48,96 +48,45 @@ import {
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useEffect, useMemo } from "react"
 
-// Sample users data
-const users = [
-  {
-    id: "1",
-    name: "Alex Johnson",
-    email: "alex@example.com",
-    walletAddress: "0x1234...5678",
-    joinDate: "2025-01-15",
-    tokensCreated: 3,
-    status: "active",
-    role: "user",
-    lastLogin: "2025-03-22",
-    avatar: null,
-  },
-  {
-    id: "2",
-    name: "Sarah Williams",
-    email: "sarah@example.com",
-    walletAddress: "0xabcd...efgh",
-    joinDate: "2025-02-20",
-    tokensCreated: 1,
-    status: "active",
-    role: "user",
-    lastLogin: "2025-03-21",
-    avatar: null,
-  },
-  {
-    id: "3",
-    name: "Michael Chen",
-    email: "michael@example.com",
-    walletAddress: "0x9876...5432",
-    joinDate: "2025-01-10",
-    tokensCreated: 5,
-    status: "active",
-    role: "premium",
-    lastLogin: "2025-03-23",
-    avatar: null,
-  },
-  {
-    id: "4",
-    name: "Emma Thompson",
-    email: "emma@example.com",
-    walletAddress: "0x2468...1357",
-    joinDate: "2025-03-05",
-    tokensCreated: 0,
-    status: "inactive",
-    role: "user",
-    lastLogin: "2025-03-10",
-    avatar: null,
-  },
-  {
-    id: "5",
-    name: "David Rodriguez",
-    email: "david@example.com",
-    walletAddress: "0xfedc...ba98",
-    joinDate: "2025-02-25",
-    tokensCreated: 2,
-    status: "active",
-    role: "admin",
-    lastLogin: "2025-03-23",
-    avatar: null,
-  },
-  {
-    id: "6",
-    name: "Lisa Wang",
-    email: "lisa@example.com",
-    walletAddress: "0x8642...1357",
-    joinDate: "2025-01-30",
-    tokensCreated: 4,
-    status: "suspended",
-    role: "user",
-    lastLogin: "2025-03-15",
-    avatar: null,
-  },
-  {
-    id: "7",
-    name: "James Wilson",
-    email: "james@example.com",
-    walletAddress: "0x7531...2468",
-    joinDate: "2025-03-10",
-    tokensCreated: 1,
-    status: "active",
-    role: "premium",
-    lastLogin: "2025-03-22",
-    avatar: null,
-  },
-]
+
 
 export default function AdminUsersPage() {
+
+const [users, setUsers] = useState<any[]>([])
+
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const res = await fetch("http://127.0.0.1:5000/admin/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+  
+      const data = await res.json()
+  
+      if (!Array.isArray(data)) {
+        throw new Error(data.error || "Invalid user data")
+      }
+  
+      setUsers(data)
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to load users",
+        variant: "destructive",
+      })
+      setUsers([]) // fallback to empty array to prevent .filter errors
+    }
+  }
+  
+
+  fetchUsers()
+}, [])
+
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [userDetailsOpen, setUserDetailsOpen] = useState(false)
   const [editUserOpen, setEditUserOpen] = useState(false)
@@ -157,13 +106,25 @@ export default function AdminUsersPage() {
   })
 
   // Sample user statistics
-  const userStats = {
-    totalUsers: users.length,
-    activeUsers: users.filter((user) => user.status === "active").length,
-    premiumUsers: users.filter((user) => user.role === "premium").length,
-    suspendedUsers: users.filter((user) => user.status === "suspended").length,
-    newUsersToday: 2,
-  }
+  const userStats = useMemo(() => {
+    if (!Array.isArray(users)) return {
+      totalUsers: 0,
+      activeUsers: 0,
+      premiumUsers: 0,
+      suspendedUsers: 0,
+      newUsersToday: 0,
+    }
+  
+    return {
+      totalUsers: users.length,
+      activeUsers: users.filter((u) => u.status === "active").length,
+      premiumUsers: users.filter((u) => u.role === "premium").length,
+      suspendedUsers: users.filter((u) => u.status === "suspended").length,
+      newUsersToday: users.filter((u) => u.joinDate === "2025-04-19").length,
+    }
+  }, [users])
+  
+  
 
   const handleRefresh = () => {
     setIsRefreshing(true)
@@ -219,29 +180,109 @@ export default function AdminUsersPage() {
     }
   }
 
-  const handleSubmitEditUser = (e: React.FormEvent) => {
-    e.preventDefault()
-    toast({
-      title: "User updated",
-      description: `${selectedUser.name}'s information has been updated`,
-    })
-    setEditUserOpen(false)
-  }
+  const handleSubmitEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast({
+        title: "Unauthorized",
+        description: "Please log in again.",
+        variant: "destructive",
+      });
+      return;
+    }
+  
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/admin/users/${selectedUser.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(selectedUser),
+      });
+  
+      const updatedUser = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(updatedUser.error || "Failed to update user");
+      }
+  
+      setUsers((prev) =>
+        prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+      );
+  
+      toast({
+        title: "User updated",
+        description: `${updatedUser.name}'s information has been saved.`,
+      });
+  
+      setEditUserOpen(false);
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
+  
 
-  const handleAddUser = (e: React.FormEvent) => {
+  const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault()
-    toast({
-      title: "User added",
-      description: `${newUserData.name} has been added to the platform`,
-    })
-    setNewUserData({
-      name: "",
-      email: "",
-      walletAddress: "",
-      role: "user",
-    })
-    setAddUserOpen(false)
+  
+    const token = localStorage.getItem("token")
+    if (!token) {
+      toast({
+        title: "Unauthorized",
+        description: "Please log in again.",
+        variant: "destructive",
+      })
+      return
+    }
+  
+    try {
+      const res = await fetch("http://127.0.0.1:5000/admin/create-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newUserData),
+      })
+  
+      const data = await res.json()
+  
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create user")
+      }
+  
+      // Add new user to local state
+      setUsers((prev) => [...prev, data])
+  
+      toast({
+        title: "User added",
+        description: `${newUserData.name} has been added to the platform`,
+      })
+  
+      // Reset form and close modal
+      setNewUserData({
+        name: "",
+        email: "",
+        walletAddress: "",
+        role: "user",
+      })
+      setAddUserOpen(false)
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Something went wrong",
+        variant: "destructive",
+      })
+    }
   }
+  
 
   const handleSuspendUser = (user: any) => {
     toast({
@@ -870,7 +911,12 @@ export default function AdminUsersPage() {
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-name">Name</Label>
-                  <Input id="edit-name" defaultValue={selectedUser.name} />
+                  <Input
+                     id="edit-name"
+                     value={selectedUser.name}
+                     onChange={(e) => setSelectedUser({ ...selectedUser, name: e.target.value })}
+                  />
+
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-email">Email</Label>

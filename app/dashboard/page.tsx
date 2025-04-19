@@ -22,7 +22,12 @@ export default function DashboardPage() {
   // Fetch tokens from backend
   const fetchTokens = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/coins")
+      const token = localStorage.getItem("token") // ✅ Get token from localStorage
+      const res = await fetch("http://127.0.0.1:5000/user-coins", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       const data = await res.json()
       if (Array.isArray(data)) {
         setTokens(data)
@@ -36,6 +41,7 @@ export default function DashboardPage() {
       })
     }
   }
+  
 
   useEffect(() => {
     fetchTokens()
@@ -210,12 +216,14 @@ export default function DashboardPage() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() =>
+                              onClick={() => {
+                                const url = `${window.location.origin}/token/${token.name}`
+                                navigator.clipboard.writeText(url)
                                 toast({
-                                  title: "Open Explorer",
-                                  description: "Explorer link is a placeholder in demo.",
+                                  title: "Copied!",
+                                  description: "Token link copied to clipboard.",
                                 })
-                              }
+                              }}
                             >
                               <ExternalLink className="h-4 w-4" />
                             </Button>

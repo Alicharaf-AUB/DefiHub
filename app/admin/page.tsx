@@ -49,128 +49,28 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import {
+  LineChart as RechartsLineChart,
+  Line,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar, 
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts"
+import dayjs from "dayjs"
 
-// Sample data for all platform tokens
-const allTokens = [
-  {
-    id: "1",
-    name: "DeFi Token",
-    symbol: "DFT",
-    network: "Ethereum",
-    creator: "0x1234...5678",
-    supply: "1,000,000",
-    holders: 42,
-    price: 0.0023,
-    marketCap: 2300,
-    change24h: 5.2,
-    volume24h: 1200,
-    createdAt: "2025-03-15",
-    status: "active",
-  },
-  {
-    id: "2",
-    name: "Community Coin",
-    symbol: "COM",
-    network: "BSC",
-    creator: "0xabcd...efgh",
-    supply: "10,000,000",
-    holders: 128,
-    price: 0.00045,
-    marketCap: 4500,
-    change24h: -2.8,
-    volume24h: 3500,
-    createdAt: "2025-03-10",
-    status: "active",
-  },
-  {
-    id: "3",
-    name: "Project X Token",
-    symbol: "PXT",
-    network: "Polygon",
-    creator: "0x7890...1234",
-    supply: "500,000",
-    holders: 17,
-    price: 0.0075,
-    marketCap: 3750,
-    change24h: 12.4,
-    volume24h: 950,
-    createdAt: "2025-03-20",
-    status: "active",
-  },
-  {
-    id: "4",
-    name: "Metaverse Token",
-    symbol: "MVT",
-    network: "Ethereum",
-    creator: "0x2468...1357",
-    supply: "5,000,000",
-    holders: 89,
-    price: 0.0012,
-    marketCap: 6000,
-    change24h: -5.7,
-    volume24h: 2800,
-    createdAt: "2025-03-05",
-    status: "active",
-  },
-  {
-    id: "5",
-    name: "Gaming Coin",
-    symbol: "GMC",
-    network: "Avalanche",
-    creator: "0x9876...5432",
-    supply: "2,500,000",
-    holders: 63,
-    price: 0.0034,
-    marketCap: 8500,
-    change24h: 8.9,
-    volume24h: 4200,
-    createdAt: "2025-03-12",
-    status: "active",
-  },
-  {
-    id: "6",
-    name: "Finance Protocol",
-    symbol: "FNP",
-    network: "BSC",
-    creator: "0xfedc...ba98",
-    supply: "750,000",
-    holders: 31,
-    price: 0.0095,
-    marketCap: 7125,
-    change24h: -1.3,
-    volume24h: 1850,
-    createdAt: "2025-03-18",
-    status: "flagged",
-  },
-  {
-    id: "7",
-    name: "Art NFT Token",
-    symbol: "ANT",
-    network: "Polygon",
-    creator: "0x1357...2468",
-    supply: "100,000",
-    holders: 22,
-    price: 0.0215,
-    marketCap: 2150,
-    change24h: 15.6,
-    volume24h: 980,
-    createdAt: "2025-03-22",
-    status: "active",
-  },
-]
 
-// Platform statistics
-const platformStats = {
-  totalTokens: allTokens.length,
-  totalUsers: 1245,
-  totalVolume24h: allTokens.reduce((sum, token) => sum + token.volume24h, 0),
-  totalMarketCap: allTokens.reduce((sum, token) => sum + token.marketCap, 0),
-  activeTokens: allTokens.filter((token) => token.status === "active").length,
-  flaggedTokens: allTokens.filter((token) => token.status === "flagged").length,
-}
 
 export default function AdminPage() {
-  const [selectedToken, setSelectedToken] = useState(allTokens[0])
+  const [tokens, setTokens] = useState<any[]>([])
+  const [selectedToken, setSelectedToken] = useState<any | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [buyDialogOpen, setBuyDialogOpen] = useState(false)
   const [sellDialogOpen, setSellDialogOpen] = useState(false)
@@ -185,7 +85,100 @@ export default function AdminPage() {
   const [filterNetwork, setFilterNetwork] = useState("all")
   const { toast } = useToast()
   const router = useRouter()
+  const [authorized, setAuthorized] = useState(false)
   const [modifiedTokens, setModifiedTokens] = useState<Record<string, any>>({})
+
+  
+// Platform statistics
+const platformStats = {
+  totalTokens: tokens.length,
+  totalUsers: 1245, // you can fetch this later via /admin/users
+  totalVolume24h: tokens.reduce((sum, t) => sum + (t.volume24h || 0), 0),
+  totalMarketCap: tokens.reduce((sum, t) => sum + (t.marketCap || 0), 0),
+  activeTokens: tokens.filter((t) => t.status === "active").length,
+  flaggedTokens: tokens.filter((t) => t.status === "flagged").length,
+}
+
+const volumeByNetwork = Object.entries(
+  tokens.reduce((acc: Record<string, number>, token) => {
+    const net = token.network || "Unknown"
+    acc[net] = (acc[net] || 0) + (token.volume24h || 0)
+    return acc
+  }, {})
+).map(([network, volume]) => ({ network, volume }))
+
+const statusCounts = tokens.reduce((acc: Record<string, number>, token) => {
+  const status = token.status || "unknown"
+  acc[status] = (acc[status] || 0) + 1
+  return acc
+}, {})
+
+const statusData = Object.entries(statusCounts).map(([status, value]) => ({
+  name: status.charAt(0).toUpperCase() + status.slice(1),
+  value,
+}))
+
+const COLORS = ["#a855f7", "#c084fc", "#d8b4fe", "#ede9fe"]
+
+const tokenCreationStats = tokens.reduce((acc: Record<string, number>, token) => {
+  const createdDate = token.created_at?.split("T")[0] || token.created_at?.split(" ")[0] || "Unknown"
+  const date = dayjs(createdDate).format("YYYY-MM-DD")
+  acc[date] = (acc[date] || 0) + 1
+  return acc
+}, {})
+
+const creationData = Object.entries(tokenCreationStats)
+  .sort(([a], [b]) => a.localeCompare(b)) // sort by date ascending
+  .map(([date, count]) => ({ date, count }))
+
+
+
+
+useEffect(() => {
+  const mockEnrichTokens = (tokens: any[]) => {
+    return tokens.map((t) => {
+      const price = Number((Math.random() * 0.01).toFixed(6)) // $0.000001 to $0.01
+      const volume24h = Math.floor(Math.random() * 10000)
+      const change24h = Number(((Math.random() - 0.5) * 20).toFixed(2)) // -10% to +10%
+      const marketCap = Math.floor(price * (t.total_supply || 1000000))
+      const status = Math.random() < 0.1 ? "flagged" : "active"
+
+      return {
+        ...t,
+        price,
+        volume24h,
+        change24h,
+        marketCap,
+        status,
+      }
+    })
+  }
+
+  const fetchTokens = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const res = await fetch("http://127.0.0.1:5000/coins", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const data = await res.json()
+      const enriched = mockEnrichTokens(data)
+      setTokens(enriched)
+      if (enriched.length > 0) setSelectedToken(enriched[0])
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to load tokens",
+        variant: "destructive",
+      })
+    }
+  }
+
+  fetchTokens()
+}, [])
+
+  
 
   const handleRefresh = () => {
     setIsRefreshing(true)
@@ -220,7 +213,7 @@ export default function AdminPage() {
     const updatedTokens = { ...modifiedTokens }
     updatedTokens[selectedToken.id] = {
       ...(modifiedTokens[selectedToken.id] || selectedToken),
-      holders: (Number.parseInt(selectedToken.holders.toString()) + 1).toString(),
+      holders: ((parseInt(selectedToken.holders ?? "0") || 0) + 1).toString(),
       volume24h: selectedToken.volume24h + Number.parseFloat(buyAmount) * selectedToken.price,
     }
     setModifiedTokens(updatedTokens)
@@ -288,7 +281,7 @@ export default function AdminPage() {
 
     // Create a simple CSV string with token data
     const headers = "Token Name,Symbol,Network,Supply,Holders,Price,Market Cap,24h Change,Volume 24h,Status\n"
-    const rows = allTokens
+    const rows = tokens
       .map(
         (token) =>
           `${token.name},${token.symbol},${token.network},${token.supply},${token.holders},${token.price},${token.marketCap},${token.change24h}%,${token.volume24h},${token.status}`,
@@ -309,20 +302,20 @@ export default function AdminPage() {
   }
 
   // Get the current token data, either from modifiedTokens or the original data
-  const getTokenData = (token: (typeof allTokens)[0]) => {
+  const getTokenData = (token: (typeof tokens)[0]) => {
     return modifiedTokens[token.id] || token
   }
 
   // Sort and filter tokens
-  const filteredTokens = allTokens
+  const filteredTokens = tokens
     .filter((token) => {
       // Apply search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
         return (
-          token.name.toLowerCase().includes(query) ||
-          token.symbol.toLowerCase().includes(query) ||
-          token.creator.toLowerCase().includes(query)
+          token.name?.toLowerCase().includes(query) ||
+          token.symbol?.toLowerCase().includes(query) ||
+          token.creator?.toLowerCase().includes(query)
         )
       }
       return true
@@ -369,6 +362,19 @@ export default function AdminPage() {
 
     return sortDirection === "asc" ? <ArrowUp className="h-4 w-4 ml-1" /> : <ArrowDown className="h-4 w-4 ml-1" />
   }
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    const isAdmin = localStorage.getItem("isAdmin") === "true"
+
+    if (!token || !isAdmin) {
+      router.push("/admin-login") // redirect if not admin
+    } else {
+      setAuthorized(true)
+    }
+  }, [])
+
+  if (!authorized) return null
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -513,7 +519,7 @@ export default function AdminPage() {
                   </Select>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Showing {filteredTokens.length} of {allTokens.length} tokens
+                  Showing {filteredTokens.length} of {tokens.length} tokens
                 </div>
               </div>
 
@@ -560,15 +566,23 @@ export default function AdminPage() {
                           </div>
                         </TableCell>
                         <TableCell>{token.network}</TableCell>
-                        <TableCell>${token.price.toFixed(6)}</TableCell>
-                        <TableCell>${token.marketCap.toLocaleString()}</TableCell>
+                        <TableCell>
+                          {typeof token.price === "number" ? `$${token.price.toFixed(6)}` : "N/A"}
+                        </TableCell>
+                        <TableCell>
+                          {typeof token.marketCap === "number" ? `$${token.marketCap.toLocaleString()}` : "N/A"}
+                        </TableCell>
+
                         <TableCell>
                           <span className={token.change24h >= 0 ? "text-green-600" : "text-red-600"}>
                             {token.change24h >= 0 ? "+" : ""}
                             {token.change24h}%
                           </span>
                         </TableCell>
-                        <TableCell>${token.volume24h.toLocaleString()}</TableCell>
+                        <TableCell>
+                          {typeof token.volume24h === "number" ? `$${token.volume24h.toLocaleString()}` : "N/A"}
+                        </TableCell>
+
                         <TableCell>
                           {token.status === "active" ? (
                             <Badge
@@ -647,7 +661,7 @@ export default function AdminPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {allTokens
+                        {tokens
                           .sort((a, b) => b.change24h - a.change24h)
                           .slice(0, 5)
                           .map((token) => (
@@ -662,7 +676,9 @@ export default function AdminPage() {
                                   <span>{token.name}</span>
                                 </div>
                               </TableCell>
-                              <TableCell>${token.price.toFixed(6)}</TableCell>
+                              <TableCell>
+                          {typeof token.price === "number" ? `$${token.price.toFixed(6)}` : "N/A"}
+                        </TableCell>
                               <TableCell>
                                 <span className="text-green-600">+{token.change24h}%</span>
                               </TableCell>
@@ -688,7 +704,7 @@ export default function AdminPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {allTokens
+                        {tokens
                           .sort((a, b) => a.change24h - b.change24h)
                           .slice(0, 5)
                           .map((token) => (
@@ -703,7 +719,9 @@ export default function AdminPage() {
                                   <span>{token.name}</span>
                                 </div>
                               </TableCell>
-                              <TableCell>${token.price.toFixed(6)}</TableCell>
+                              <TableCell>
+                          {typeof token.price === "number" ? `$${token.price.toFixed(6)}` : "N/A"}
+                        </TableCell>
                               <TableCell>
                                 <span className="text-red-600">{token.change24h}%</span>
                               </TableCell>
@@ -716,23 +734,35 @@ export default function AdminPage() {
               </div>
 
               <div className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Volume Distribution</CardTitle>
-                    <CardDescription>24h trading volume by network</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px] flex items-center justify-center bg-muted/40 rounded-md">
-                      <div className="text-center">
-                        <BarChart3 className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-muted-foreground">
-                          Volume chart will be available after backend integration
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+  <Card>
+    <CardHeader>
+      <CardTitle className="text-lg">Volume Distribution</CardTitle>
+      <CardDescription>24h trading volume by network</CardDescription>
+    </CardHeader>
+    <CardContent>
+      {volumeByNetwork.length > 0 ? (
+        <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={volumeByNetwork}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="network" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="volume" fill="#6b46c1" radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+      
+      ) : (
+        <div className="h-[300px] flex items-center justify-center bg-muted/40 rounded-md">
+          <div className="text-center">
+            <BarChart3 className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-muted-foreground">No data to show</p>
+          </div>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+</div>
+
             </TabsContent>
 
             <TabsContent value="analytics" className="pt-6">
@@ -743,32 +773,57 @@ export default function AdminPage() {
                     <CardDescription>Token and user growth over time</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[300px] flex items-center justify-center bg-muted/40 rounded-md">
-                      <div className="text-center">
-                        <LineChart className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-muted-foreground">
-                          Growth chart will be available after backend integration
-                        </p>
-                      </div>
+                    {creationData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                  <RechartsLineChart data={creationData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="count" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 4 }} />
+                  </RechartsLineChart>
+                  </ResponsiveContainer>
+                      ) : (
+                     <div className="h-[300px] flex items-center justify-center bg-muted/40 rounded-md">
+                      <p className="text-muted-foreground">No tokens created yet</p>
                     </div>
-                  </CardContent>
+                    )}
+                    </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Token Distribution</CardTitle>
-                    <CardDescription>Distribution by network and type</CardDescription>
+                    <CardTitle className="text-lg">Token Status Breakdown</CardTitle>
+                    <CardDescription>Highlights active vs flagged tokens</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-[300px] flex items-center justify-center bg-muted/40 rounded-md">
-                      <div className="text-center">
-                        <PieChart className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                        <p className="text-muted-foreground">
-                          Distribution chart will be available after backend integration
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
+  {statusData.length > 0 ? (
+    <ResponsiveContainer width="100%" height={300}>
+      <RechartsPieChart>
+        <Pie
+          data={statusData}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="50%"
+          outerRadius={100}
+          fill="#8884d8"
+          label
+        >
+          {statusData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Pie>
+        <Tooltip />
+      </RechartsPieChart>
+    </ResponsiveContainer>
+  ) : (
+    <div className="h-[300px] flex items-center justify-center bg-muted/40 rounded-md">
+      <p className="text-muted-foreground">No data to display</p>
+    </div>
+  )}
+</CardContent>
+
                 </Card>
               </div>
 
@@ -926,63 +981,67 @@ export default function AdminPage() {
       </main>
 
       {/* Buy Dialog */}
-      <Dialog open={buyDialogOpen} onOpenChange={setBuyDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Buy {selectedToken.symbol} Tokens</DialogTitle>
-            <DialogDescription>Purchase tokens for the platform treasury</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleBuySubmit}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="buyAmount">Amount to Buy</Label>
-                <div className="flex">
-                  <Input
-                    id="buyAmount"
-                    type="number"
-                    placeholder="0.0"
-                    className="rounded-r-none"
-                    value={buyAmount}
-                    onChange={(e) => setBuyAmount(e.target.value)}
-                    required
-                  />
-                  <div className="flex items-center justify-center px-3 border border-l-0 rounded-r-md bg-muted">
-                    {selectedToken.symbol}
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Token Information</Label>
-                <div className="rounded-md border p-3 text-sm">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-muted-foreground">Current Price:</span>
-                    <span>${selectedToken.price.toFixed(6)}</span>
-                  </div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-muted-foreground">24h Change:</span>
-                    <span className={selectedToken.change24h >= 0 ? "text-green-600" : "text-red-600"}>
-                      {selectedToken.change24h >= 0 ? "+" : ""}
-                      {selectedToken.change24h}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Network:</span>
-                    <span>{selectedToken.network}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <p>Note: This is a demo. No actual tokens will be purchased.</p>
+      {selectedToken && (
+  <Dialog open={buyDialogOpen} onOpenChange={setBuyDialogOpen}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Buy {selectedToken.symbol} Tokens</DialogTitle>
+        <DialogDescription>Purchase tokens for the platform treasury</DialogDescription>
+      </DialogHeader>
+      <form onSubmit={handleBuySubmit}>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="buyAmount">Amount to Buy</Label>
+            <div className="flex">
+              <Input
+                id="buyAmount"
+                type="number"
+                placeholder="0.0"
+                className="rounded-r-none"
+                value={buyAmount}
+                onChange={(e) => setBuyAmount(e.target.value)}
+                required
+              />
+              <div className="flex items-center justify-center px-3 border border-l-0 rounded-r-md bg-muted">
+                {selectedToken.symbol}
               </div>
             </div>
-            <DialogFooter>
-              <Button type="submit">Buy Tokens</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+          <div className="space-y-2">
+            <Label>Token Information</Label>
+            <div className="rounded-md border p-3 text-sm">
+              <div className="flex justify-between mb-1">
+                <span className="text-muted-foreground">Current Price:</span>
+                <span>${selectedToken.price?.toFixed(6)}</span>
+              </div>
+              <div className="flex justify-between mb-1">
+                <span className="text-muted-foreground">24h Change:</span>
+                <span className={selectedToken.change24h >= 0 ? "text-green-600" : "text-red-600"}>
+                  {selectedToken.change24h >= 0 ? "+" : ""}
+                  {selectedToken.change24h}%
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Network:</span>
+                <span>{selectedToken.network}</span>
+              </div>
+            </div>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            <p>Note: This is a demo. No actual tokens will be purchased.</p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit">Buy Tokens</Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>
+)}
+
 
       {/* Sell Dialog */}
+      {selectedToken && (
       <Dialog open={sellDialogOpen} onOpenChange={setSellDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -1013,7 +1072,11 @@ export default function AdminPage() {
                 <div className="rounded-md border p-3 text-sm">
                   <div className="flex justify-between mb-1">
                     <span className="text-muted-foreground">Current Price:</span>
-                    <span>${selectedToken.price.toFixed(6)}</span>
+                    <span>
+                      {typeof selectedToken.price === "number"
+                      ? `$${selectedToken.price.toFixed(6)}`
+                     : "N/A"}
+                    </span>
                   </div>
                   <div className="flex justify-between mb-1">
                     <span className="text-muted-foreground">24h Change:</span>
@@ -1037,9 +1100,11 @@ export default function AdminPage() {
             </DialogFooter>
           </form>
         </DialogContent>
-      </Dialog>
+      </Dialog>  
+      )}
 
       {/* Flag Dialog */}
+      {selectedToken && (
       <Dialog open={flagDialogOpen} onOpenChange={setFlagDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -1089,6 +1154,7 @@ export default function AdminPage() {
           </form>
         </DialogContent>
       </Dialog>
+      )}
 
       <Footer />
     </div>
