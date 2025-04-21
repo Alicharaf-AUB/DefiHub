@@ -121,6 +121,8 @@ export default function CreateTokenPage() {
     }
   }
 
+  const [etherscanLink, setEtherscanLink] = useState<string | null>(null)
+
   const deployToken = async () => {
     toast({
       title: "Token deployment initiated",
@@ -134,7 +136,7 @@ export default function CreateTokenPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ✅ Send the token to Flask
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(tokenData),
       })
@@ -142,11 +144,16 @@ export default function CreateTokenPage() {
       const result = await response.json()
   
       if (response.ok) {
+        const contractAddress = result.rust.contract_address
+        setEtherscanLink(`https://sepolia.etherscan.io/address/${contractAddress}`)
+  
         toast({
           title: "Token deployed successfully",
           description: `Token "${result.saved.name}" created!`,
         })
-        window.location.href = "/dashboard"
+  
+        // ✅ optional delay or comment this out to keep user on page
+        // window.location.href = "/dashboard"
       } else {
         toast({
           title: "Deployment failed",
@@ -162,6 +169,7 @@ export default function CreateTokenPage() {
       })
     }
   }
+  
   
   
 
@@ -587,6 +595,25 @@ export default function CreateTokenPage() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardFooter>
+            {etherscanLink && (
+  <div className="mt-6 flex flex-col items-center gap-3">
+    <a
+      href={etherscanLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-sm font-medium text-purple-600 hover:underline"
+    >
+      🎉 View your token on Etherscan
+    </a>
+    <Button
+      className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600 mt-1 mb-2"
+      onClick={() => (window.location.href = "/dashboard")}
+    >
+      Go to Dashboard
+    </Button>
+  </div>
+)}
+
           </Card>
         )}
       </div>
